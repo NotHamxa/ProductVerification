@@ -5,7 +5,7 @@ import csv
 import codecs
 from app.api.database.db import Database
 import datetime
-from app.core.Config import settings
+from app.core.Config import settings,AdminData
 logger = Log(settings.logKey)
 router = APIRouter()
 database =Database(settings.dbPassword,settings.dbDatabase)
@@ -24,13 +24,13 @@ def verify(productID:str):
 
 
 @router.post("/addproducts/")
-async def AddProducts(Username:str,Password:str,file:UploadFile):
-    state,query = database.checkAdmin(Username, Password)
+async def AddProducts(LogInData:AdminData,file:UploadFile):
+    state,query = database.checkAdmin(LogInData.Username, LogInData.Password)
     if not state:
         if query==1:
             logger.log(levels.warning,"Add Product Verification:Admin username does not exist")
         elif query==2:
-            logger.log(levels.warning,f"Add Product Verification:Password for username '{Username}' is incorrect")
+            logger.log(levels.warning,f"Add Product Verification:Password for username '{LogInData.Username}' is incorrect")
         return {"detail":query}
     csvReader =csv.DictReader(codecs.iterdecode(file.file,'utf-8'))
     IdsAdded=[]
@@ -47,5 +47,6 @@ async def AddProducts(Username:str,Password:str,file:UploadFile):
         database.writeRecords(rows)
 
     if len(IdsAdded)!=0:
-        logger.log(levels.warning,f"Admin '{Username}' added {len(IdsAdded)} records")
-    return "added records for",IdsAdded
+        logger.log(levels.warning,f"Admin '{LogInData.Username}' added {len(IdsAdded)} records")
+        return "added records for",IdsAdded
+    return "No new records detected"
