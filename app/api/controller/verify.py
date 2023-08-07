@@ -3,6 +3,6 @@ from app.api.database.db import database
 def VerifyProduct(productId):
     response = database.read({"VerificationCode":productId})
     if response==None:
-        return {"status":200,"detail":False}
+        return False
     else:
-        return {"status":200,"detail":True}
+        return True

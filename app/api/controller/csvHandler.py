@@ -19,7 +19,7 @@ def processCsvFile(file):
         rows["DateAdded"] = date
         database.writeRecords(rows)
     logger.log(levels.warning,f"Add Product Verification: {IdsAdded} more records added")
-    return {"status":200,"records_added":IdsAdded}
+    return IdsAdded
 
 
 
