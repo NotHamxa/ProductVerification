@@ -3,15 +3,15 @@ from fastapi import HTTPException
 
 class VerificationResponseSchema(BaseModel):
     status_code: int
-    detail : bool
+    detail : bool= None
     error:str = None
 
 class AdminLoginResponse(BaseModel):
     status_code :int
-    token:str
+    token:str = None
     error:str = None
 
 class CsvResponseSchema(BaseModel):
     status_code : int
-    records_added:int
+    records_added:int= None
     error:str=None
