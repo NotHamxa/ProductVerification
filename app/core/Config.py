@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     dbUrl:str
     dbDatabase:str
     logKey:str
+    JWT_SECRET:str
+    JWT_ALGORITHM:str
 
 class AdminLoginSchema(BaseModel):
     Username:str
