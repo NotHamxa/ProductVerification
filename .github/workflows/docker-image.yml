@@ -14,13 +14,14 @@ jobs:
 
     steps:
     - name: Get current date
-      run: echo "{date}={$(date +'%d-%m-%Y')}" >> $GITHUB_STATE
+      run: |
+        echo "builddate=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+    - id: version
     - uses: actions/checkout@v3
     - name: login
       run: docker login ${{secrets.AZURE_LOGIN}} -u ${{secrets.AZURE_USERNAME}} -p ${{secrets.AZURE_PASSWORD}}
     - name: build image
-      run: docker build -t ${{secrets.AZURE_LOGIN}}/fastapi:${env.date} .
+      run: docker build -t ${{secrets.AZURE_LOGIN}}/fastapi:${steps.version.outputs.builddate} .
       
     - name: push image
-      run: docker push ${{secrets.AZURE_LOGIN}}/fastapi:${env.date}
-
+      run: docker push ${{secrets.AZURE_LOGIN}}/fastapi:${steps.version.outputs.builddate}
