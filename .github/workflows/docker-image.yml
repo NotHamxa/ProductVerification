@@ -25,5 +25,7 @@ jobs:
       
     - name: push image
       run: docker push ${{secrets.AZURE_LOGIN}}/fastapi:${{env.RELEASE_DATE}}
+    - name: build main image
+      run: docker build -t ${{secrets.AZURE_LOGIN}}/fastapi:mainbuild .
     - name: push main image
       run: docker push ${{secrets.AZURE_LOGIN}}/fastapi:mainbuild
