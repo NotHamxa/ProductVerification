@@ -13,15 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Get current date
+    - name: set release date
       run: |
-        echo "builddate=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-    - id: version
+        echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
+        
     - uses: actions/checkout@v3
     - name: login
       run: docker login ${{secrets.AZURE_LOGIN}} -u ${{secrets.AZURE_USERNAME}} -p ${{secrets.AZURE_PASSWORD}}
     - name: build image
-      run: docker build -t ${{secrets.AZURE_LOGIN}}/fastapi:${steps.version.outputs.builddate} .
+      run: docker build -t ${{secrets.AZURE_LOGIN}}/fastapi:${env.RELEASE_DATE} .
       
     - name: push image
-      run: docker push ${{secrets.AZURE_LOGIN}}/fastapi:${steps.version.outputs.builddate}
+      run: docker push ${{secrets.AZURE_LOGIN}}/fastapi:${env.RELEASE_DATE}
