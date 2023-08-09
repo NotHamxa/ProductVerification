@@ -1,9 +1,9 @@
 import logging
-from logdna import LogDNAHandler
 import datetime
-
 from enum import Enum
+from logdna import LogDNAHandler
 
+from app.core.Config import settings
 
 
 class levels(int,Enum):
@@ -27,3 +27,4 @@ class Log():
         CTime = datetime.datetime.now()
         CTime = CTime.strftime("%H-%M-%S")
         return CTime
+logger = Log(settings.logKey)

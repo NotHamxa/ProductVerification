@@ -1,51 +1,55 @@
-from fastapi import APIRouter,UploadFile
+from fastapi import APIRouter,UploadFile,Depends
 from fastapi.responses import RedirectResponse
-from app.api.log.logger import Log,levels
-import csv
-import codecs
-from app.api.database.db import Database
-import datetime
-from app.core.Config import settings
-logger = Log(settings.logKey)
+from app.api.auth.auth_bearer import JWTBearer
+from app.core.Config import AdminLoginSchema
+from app.api.controller.csvHandler import processCsvFile
+from app.api.controller.login import AuthenticateCredentials
+from app.api.controller.verify import VerifyProduct
+from app.core.ResponseSchema import VerificationResponseSchema,AdminLoginResponse,CsvResponseSchema
 router = APIRouter()
-database =Database(settings.dbPassword,settings.dbDatabase)
 
 @router.get("/")
 def redirect():
     return RedirectResponse("/docs")
 
-@router.get("/verify/{productID}")
-def verify(productID:str):
-    response = database.read({"VerificationCode":productID})
-    if response==None:
-        return {"detail":False}
-    else:
-        return {"detail":True}
+@router.get("/verify/{productId}")
+async def verify(productId:str):
+    try:
+        IsVerified= VerifyProduct(productId)
+        if IsVerified==True:
+            status_code = 200
+        else:
+            status_code = 404
+        response = VerificationResponseSchema(**{"status_code":status_code,"detail":IsVerified})
+        return response
+
+    except Exception as e:
+        status_code = 400
+        response = VerificationResponseSchema(**{"status_code": status_code,"error":str(e)})
+        return response
+
+@router.post("/login/")
+async def login(data:AdminLoginSchema):
+    try:
+
+        token = AuthenticateCredentials(data)
+        status_code = 200
+        response = AdminLoginResponse(**{"status_code":status_code,"token":token})
+        return response
+    except Exception as e:
+        status_code = 400
+        response = AdminLoginResponse(**{"status_code": status_code, "error": str(e)})
+        return response
+@router.post("/addproducts/",dependencies=[Depends(JWTBearer())])
+async def AddProducts(file:UploadFile):
+    try:
+        IdsAdded = processCsvFile(file)
+        status_code = 200
+        response = CsvResponseSchema(**{"status_code":status_code,"records_added":IdsAdded})
+        return response
+    except Exception as e:
+        status_code = 400
+        response = CsvResponseSchema(**{"status_code":status_code,"error":str(e)})
+        return response
 
 
-@router.post("/addproducts/")
-async def AddProducts(Username:str,Password:str,file:UploadFile):
-    state,query = database.checkAdmin(Username, Password)
-    if not state:
-        if query==1:
-            logger.log(levels.warning,"Add Product Verification:Admin username does not exist")
-        elif query==2:
-            logger.log(levels.warning,f"Add Product Verification:Password for username '{Username}' is incorrect")
-        return {"detail":query}
-    csvReader =csv.DictReader(codecs.iterdecode(file.file,'utf-8'))
-    IdsAdded=[]
-    for rows in csvReader:
-        Id = rows['VerificationCode']
-        if database.read({"VerificationCode":Id}) !=None:
-            continue
-
-        IdsAdded.append(rows["VerificationCode"])
-
-        date = datetime.datetime.now()
-        date = date.strftime("%d/%m/%Y")
-        rows["DateAdded"] = date
-        database.writeRecords(rows)
-
-    if len(IdsAdded)!=0:
-        logger.log(levels.warning,f"Admin '{Username}' added {len(IdsAdded)} records")
-    return "added records for",IdsAdded
