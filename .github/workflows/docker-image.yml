@@ -15,7 +15,7 @@ jobs:
     steps:
     - name: set release date
       run: |
-        echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
+        echo "RELEASE_DATE={$(date +'%Y-%m-%d')}" >> ${GITHUB_ENV}
         
     - uses: actions/checkout@v3
     - name: login
