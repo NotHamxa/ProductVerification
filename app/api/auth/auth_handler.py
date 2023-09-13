@@ -19,7 +19,7 @@ def signJWT(userId:str):
         "expires":time.time() + 600
     }
     token = jwt.encode(payload,JWT_SECRET,algorithm=JWT_ALGORITHM)
-    return token_response(token)
+    return token
 
 def decodeJWT(token:str):
     try:

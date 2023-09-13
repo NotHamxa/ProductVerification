@@ -1,6 +1,7 @@
 from fastapi import APIRouter,UploadFile,Depends
 from fastapi.responses import RedirectResponse
 from app.api.auth.auth_bearer import JWTBearer
+from app.api.auth.auth_handler import signJWT
 from app.core.Config import AdminLoginSchema
 from app.api.controller.csvHandler import processCsvFile
 from app.api.controller.login import AuthenticateCredentials
@@ -32,10 +33,13 @@ async def verify(productId:str):
 async def login(data:AdminLoginSchema):
     try:
 
-        token = AuthenticateCredentials(data)
-        status_code = 200
-        response = AdminLoginResponse(**{"status_code":status_code,"token":token})
-        return response
+        verification = AuthenticateCredentials(data)
+        status_code = verification["status_code"]
+        if status_code==200:
+            token = signJWT(data.Username)
+            response = AdminLoginResponse(**{"status_code":status_code,"token":str(token)})
+            return response
+        else: raise Exception(verification["detail"])
     except Exception as e:
         status_code = 400
         response = AdminLoginResponse(**{"status_code": status_code, "error": str(e)})
