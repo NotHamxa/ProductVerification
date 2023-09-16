@@ -9,9 +9,7 @@ from app.api.controller.verify import VerifyProduct
 from app.core.ResponseSchema import VerificationResponseSchema,AdminLoginResponse,CsvResponseSchema
 router = APIRouter()
 
-@router.get("/")
-def redirect():
-    return RedirectResponse("/docs")
+
 
 @router.get("/verify/{productId}")
 async def verify(productId:str):
