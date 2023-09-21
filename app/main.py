@@ -1,13 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.Router import router
-
-origins = ["http://localhost",
-           "http://localhost:3000",
-           "http://localhost:8080"]
+from app.core.Config import settings
 
 
-app = FastAPI()
+origins = settings.origins.split(",")
+app = FastAPI(title="Product Verification API")
 app.add_middleware(CORSMiddleware,
                    allow_origins = origins,
                    allow_credentials=True,

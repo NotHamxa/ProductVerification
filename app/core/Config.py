@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     logKey:str
     JWT_SECRET:str
     JWT_ALGORITHM:str
+    origins:str
 
 class AdminLoginSchema(BaseModel):
     Username:str
